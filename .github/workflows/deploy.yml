@@ -10,6 +10,10 @@ jobs:
   terraform:
     name: Provision Windows VM
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform  # Change directory to terraform/
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
