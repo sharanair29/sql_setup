@@ -1,0 +1,33 @@
+
+name: Deploy SQL Server on AWS EC2 with Ansible & Terraform
+
+on: push
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.3.0
+      
+      - name: Initialize Terraform
+        run: terraform init
+      
+      - name: Apply Terraform configuration
+        run: terraform apply -auto-approve
+      
+      - name: Configure Ansible
+        run: |
+          echo "[sqlserver]" > inventory
+          echo "$(terraform output -raw ec2_public_ip) ansible_user=Administrator ansible_password=MySecurePassword ansible_connection=winrm ansible_winrm_transport=basic" >> inventory
+      
+      - name: Run Ansible Playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: ansible/playbook.yml
+          inventory: inventory

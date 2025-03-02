@@ -1,0 +1,17 @@
+- name: Install SQL Server on AWS EC2
+  hosts: all
+  become: yes
+  tasks:
+    - name: Download SQL Server 2019 installer
+      win_get_url:
+        url: "https://go.microsoft.com/fwlink/?linkid=866662"
+        dest: "C:\\SQL2019.exe"
+    
+    - name: Install SQL Server 2019
+      win_shell: |
+        Start-Process -FilePath "C:\\SQL2019.exe" -ArgumentList "/Q /ACTION=INSTALL /FEATURES=SQLENGINE /INSTANCENAME=MSSQLSERVER /SQLSVCACCOUNT='NT AUTHORITY\\SYSTEM' /SQLSYSADMINACCOUNTS='Administrator'" -Wait
+    
+    - name: Ensure SQL Server service is running
+      win_service:
+        name: MSSQLSERVER
+        state: started
