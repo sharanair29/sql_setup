@@ -1,0 +1,25 @@
+---
+- name: Install Microsoft SQL Server
+  hosts: windows
+  tasks:
+
+    - name: Ensure WinRM is enabled
+      win_service:
+        name: WinRM
+        start_mode: auto
+        state: started
+
+    - name: Download SQL Server Express Installer
+      win_get_url:
+        url: "https://go.microsoft.com/fwlink/?linkid=866662"
+        dest: "C:\\temp\\SQLServer2019-SSEI-Expr.exe"
+
+    - name: Install SQL Server Express
+      win_shell: |
+        C:\temp\SQLServer2019-SSEI-Expr.exe /Q /ACTION=Install /FEATURES=SQL /INSTANCENAME=MSSQLSERVER /SECURITYMODE=SQL /SAPWD="StrongPassword123" /IACCEPTSQLSERVERLICENSETERMS
+
+    - name: Ensure SQL Server service is running
+      win_service:
+        name: MSSQLSERVER
+        start_mode: auto
+        state: started
