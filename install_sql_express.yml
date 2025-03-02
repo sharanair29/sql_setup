@@ -1,0 +1,22 @@
+- name: Install MS SQL Express on Windows VM
+  hosts: windows
+  tasks:
+    - name: Download SQL Server Express installer
+      win_get_url:
+        url: "https://go.microsoft.com/fwlink/?linkid=866658"
+        dest: "C:\\temp\\SQLEXPR_x64_ENU.exe"
+
+    - name: Install SQL Server Express
+      win_command: >
+        C:\temp\SQLEXPR_x64_ENU.exe /Q /ACTION=Install
+        /FEATURES=SQL /INSTANCENAME=SQLEXPRESS
+        /SECURITYMODE=SQL /SAPWD="YourStrongPassword"
+        /TCPENABLED=1 /IACCEPTSQLSERVERLICENSETERMS
+      args:
+        creates: "C:\\Program Files\\Microsoft SQL Server\\MSSQL15.SQLEXPRESS"
+    
+    - name: Ensure SQL Server Service is Running
+      win_service:
+        name: "MSSQL$SQLEXPRESS"
+        start_mode: auto
+        state: started

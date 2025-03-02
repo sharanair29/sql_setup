@@ -19,10 +19,20 @@ resource "aws_instance" "windows_vm" {
 
   user_data = <<EOF
 <powershell>
-# Enable WinRM for remote management
+# Enable WinRM and allow remote connections
 winrm quickconfig -q
 Enable-PSRemoting -Force
-Set-NetFirewallRule -Name "WINRM-HTTP-In-TCP" -RemoteAddress Any
+
+# Set up WinRM to allow unencrypted connections
+winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+winrm set winrm/config/service/auth '@{Basic="true"}'
+
+# Create a WinRM listener on all network interfaces
+winrm create winrm/config/Listener?Address=*+Transport=HTTP "@{Port="5985";Hostname="";Enabled="true"}"
+
+# Configure Windows Firewall to allow WinRM
+netsh advfirewall firewall add rule name="WinRM HTTP" dir=in action=allow protocol=TCP localport=5985
+netsh advfirewall firewall add rule name="WinRM HTTPS" dir=in action=allow protocol=TCP localport=5986
 </powershell>
 EOF
 }
@@ -40,6 +50,13 @@ resource "aws_security_group" "windows_sg" {
 
   ingress {
     from_port   = 5985
+    to_port     = 5985
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]  # Restrict in production!
+  }
+
+  ingress {
+    from_port   = 5986
     to_port     = 5986
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  # Restrict in production!
