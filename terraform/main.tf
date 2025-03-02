@@ -10,7 +10,7 @@ variable "AWS_SECRET_ACCESS_KEY" {}
 resource "aws_instance" "windows_vm" {
   ami                    = "ami-0893df1bd754c3189"  # Use latest Windows AMI
   instance_type          = "t3.medium"
-  key_name               = "sql_server_test_kp"  # Replace with your key pair name
+  key_name               = "your-key-pair"  # Replace with your key pair name
   vpc_security_group_ids = [aws_security_group.windows_sg.id]
 
   tags = {
