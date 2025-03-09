@@ -1,22 +1,29 @@
-- name: Install MS SQL Express on Windows VM
+---
+- name: Install SQL Server Express on Windows VM
   hosts: windows
   tasks:
-    - name: Download SQL Server Express installer
+    - name: Ensure temp directory exists
+      win_file:
+        path: C:\temp
+        state: directory  # Ensures that C:\temp exists
+
+    - name: Download SQL Server Express installer from Microsoft
       win_get_url:
-        url: "https://go.microsoft.com/fwlink/?linkid=866658"
-        dest: "C:\\temp\\SQLEXPR_x64_ENU.exe"
+        url: https://go.microsoft.com/fwlink/?linkid=866658  # Direct link to the SQL Server Express installer
+        dest: C:\\temp\\SQLServer2019-SSEI-Expr.exe
+        timeout: 300  # Set a reasonable timeout to allow for download time
 
     - name: Install SQL Server Express
-      win_command: >
-        C:\temp\SQLEXPR_x64_ENU.exe /Q /ACTION=Install
-        /FEATURES=SQL /INSTANCENAME=SQLEXPRESS
-        /SECURITYMODE=SQL /SAPWD="YourStrongPassword"
-        /TCPENABLED=1 /IACCEPTSQLSERVERLICENSETERMS
+      win_command: "C:\\temp\\SQLServer2019-SSEI-Expr.exe /Q /IAcceptSQLServerLicenseTerms=true"
       args:
-        creates: "C:\\Program Files\\Microsoft SQL Server\\MSSQL15.SQLEXPRESS"
-    
-    - name: Ensure SQL Server Service is Running
+        creates: "C:\\Program Files\\Microsoft SQL Server\\MSSQL15.SQLEXPRESS"  # Ensure SQL Server Express is installed before continuing
+
+    - name: Start SQL Server Express service
       win_service:
-        name: "MSSQL$SQLEXPRESS"
-        start_mode: auto
-        state: started
+        name: MSSQL$SQLEXPRESS  # This is the service name for the SQL Server Express instance
+        state: started  # Ensures the service is started
+
+    - name: Clean up the installer
+      win_file:
+        path: C:\\temp\\SQLServer2019-SSEI-Expr.exe
+        state: absent  # Remove the installer after installation to save space
