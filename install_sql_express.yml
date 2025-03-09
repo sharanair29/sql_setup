@@ -11,19 +11,19 @@
       win_get_url:
         url: https://go.microsoft.com/fwlink/?linkid=866658  # Direct link to the SQL Server Express installer
         dest: C:\\temp\\SQLServer2019-SSEI-Expr.exe
-        timeout: 300  # Set a reasonable timeout to allow for download time
+        timeout: 300  # timeout to allow for download time
 
     - name: Install SQL Server Express
       win_command: "C:\\temp\\SQLServer2019-SSEI-Expr.exe /Q /IAcceptSQLServerLicenseTerms=true"
       args:
-        creates: "C:\\Program Files\\Microsoft SQL Server\\MSSQL15.SQLEXPRESS"  # Ensure SQL Server Express is installed before continuing
+        creates: "C:\\Program Files\\Microsoft SQL Server\\MSSQL15.SQLEXPRESS"  # confirm SQL Server Express is installed before continuing
 
     - name: Start SQL Server Express service
       win_service:
-        name: MSSQL$SQLEXPRESS  # This is the service name for the SQL Server Express instance
-        state: started  # Ensures the service is started
+        name: MSSQL$SQLEXPRESS  # service name for the SQL Server Express instance
+        state: started  # confirm service is started
 
     - name: Clean up the installer
       win_file:
         path: C:\\temp\\SQLServer2019-SSEI-Expr.exe
-        state: absent  # Remove the installer after installation to save space
+        state: absent  # Remove the installer post installation 
